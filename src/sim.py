@@ -46,29 +46,43 @@ def flag(B,V):
         if v[3]:
             for i,b in enumerate(B):
                 if b[1]==v[2] and not b[2] and i not in m: m.add(i);vu.add(j);break
-    for j,v in enumerate(V):
-        if j in vu: continue
-        for i,b in enumerate(B):
-            if i not in m and b[0]-2<=v[0]<=b[0]+GR: m.add(i);break
-    return [(b[0]+GR,b[1],b[2]) for i,b in enumerate(B) if i not in m]
-def score(A,F):
-    evd={a['id'] for a in A if not a['pays']};hit={f[1] for f in F if f[1] in evd}
-    return len(hit),len(evd),len(hit),len(F)
+    rb=[i for i in range(len(B)) if i not in m];rv=[j for j in range(len(V)) if j not in vu]
+    par={('b',i):('b',i) for i in rb};par.update({('v',j):('v',j) for j in rv})
+    def f(x):
+        while par[x]!=x: par[x]=par[par[x]];x=par[x]
+        return x
+    for i in rb:
+        for j in rv:
+            if B[i][0]-2<=V[j][0]<=B[i][0]+GR: par[f(('b',i))]=f(('v',j))
+    comp={}
+    for x in par: comp.setdefault(f(x),[]).append(x)
+    conf=[];grp=[]
+    for c in comp.values():
+        bs=[x[1] for x in c if x[0]=='b'];nt=sum(1 for x in c if x[0]=='v');k=len(bs)-nt
+        if k<=0: continue
+        if nt==0:
+            for i in bs: conf.append((B[i][0]+GR,B[i][1],B[i][2]))
+        else: grp.append((max(B[i][0] for i in bs)+GR,[B[i][1] for i in bs],k))
+    return sorted(conf),sorted(grp)
 def batch(pm,pd,n=300):
-    h=e=tp=f=0;ex=[]
+    h=e=tp=nc=cv=0;ab=bi=0
     for s in range(n):
-        A=make(s);ev,_=run(A);B,V,_=perceive(ev,s,pm,pd);F=flag(B,V);a,b,c,d=score(A,F);h+=a;e+=b;tp+=c;f+=d;ex.append(d-b)
-    return dict(recall=h/e,precision=tp/f,bias=sum(ex)/n,n=n)
+        A=make(s);ev,_=run(A);B,V,_=perceive(ev,s,pm,pd);C,G=flag(B,V);evd={a['id'] for a in A if not a['pays']}
+        hit={f[1] for f in C if f[1] in evd};amb={i for g in G for i in g[2*0+1] if i in evd}
+        h+=len(hit);e+=len(evd);tp+=len(hit);nc+=len(C);cv+=len(hit|amb);u=len(C)+sum(g[2] for g in G);ab+=abs(u-len(evd));bi+=u-len(evd)
+    return dict(recall=h/e,precision=tp/nc,cover=cv/e,mae=ab/n,bias=bi/n,n=n)
 def draw(A,t,row,B,V,F,k):
+    C,G=F
     im=np.full((360,640,3),(88,84,80),np.uint8);cv2.rectangle(im,(40,60),(600,300),(236,238,238),-1)
     for s in SEATS: cv2.rectangle(im,(s[0]-14,s[1]-12),(s[0]+14,s[1]+12),(210,214,214),-1)
     cv2.line(im,(DI[0],LY),(DI[1],LY),(0,170,255),3);cv2.line(im,(DO[0],LY),(DO[1],LY),(0,170,255),3)
     cv2.putText(im,'ENTRY',(DI[0]-4,322),0,.45,(255,255,255),1);cv2.putText(im,'EXIT',(DO[0]+5,322),0,.45,(255,255,255),1)
     tv=[v[0] for v in V if 0<=t-v[0]<.6];c=(200,140,0)
     cv2.rectangle(im,(VAL[0]+8,VAL[1]-26),(VAL[0]+22,VAL[1]-12),(0,200,0) if tv else c,-1);cv2.putText(im,'RAV-KAV',(VAL[0]-4,VAL[1]-32),0,.35,(60,60,60),1)
-    tp={v[2] for v in V if 0<=t-v[0]<1.6};fl={f[1] for f in F if f[0]<=t}
+    tp={v[2] for v in V if 0<=t-v[0]<1.6};fl={f[1] for f in C if f[0]<=t};am={i for g in G if g[0]<=t for i in g[1]}-fl
     for i,x,y in row:
         p=(int(x),int(y));col=(140,140,140)
+        if i in am: col=(0,150,255)
         if i in fl: col=(60,60,220)
         cv2.circle(im,p,9,col,-1)
         if i in tp: cv2.circle(im,p,13,(60,190,60),2)
@@ -77,15 +91,15 @@ def draw(A,t,row,B,V,F,k):
     return im
 if __name__=='__main__':
     S=int(sys.argv[1]);pm=pd=.03;A=make(S);ev,pos=run(A);B,V,Al=perceive(ev,S,pm,pd);F=flag(B,V)
-    print('evaders',[a['id'] for a in A if not a['pays']],'late',[a['id'] for a in A if a['late']],'flags',[(round(f[0],1),f[1],f[2]) for f in F],'B',len(B),'V',len(V))
+    C,G=F;print('evaders',[a['id'] for a in A if not a['pays']],'late',[a['id'] for a in A if a['late']],'conf',[(round(f[0],1),f[1],f[2]) for f in C],'grp',[(round(g[0],1),g[1],g[2]) for g in G])
     vw=cv2.VideoWriter('/mnt/user-data/outputs/bus-simulation.mp4',cv2.VideoWriter_fourcc(*'mp4v'),10,(640,360));fr=[];ct=[]
     for k in range(len(pos)):
         t=k*DT;im=draw(A,t,pos[k],B,V,F,k);vw.write(im)
         if k%EVERY==0:
             cv2.imwrite('x.jpg',im,[cv2.IMWRITE_JPEG_QUALITY,50]);fr.append('data:image/jpeg;base64,'+base64.b64encode(open('x.jpg','rb').read()).decode())
-            ct.append(dict(B=sum(b[0]<=t for b in B),A=sum(a[0]<=t for a in Al),V=sum(v[0]<=t for v in V),F=sum(f[0]<=t for f in F)))
+            ct.append(dict(B=sum(b[0]<=t for b in B),A=sum(a[0]<=t for a in Al),V=sum(v[0]<=t for v in V),F=sum(f[0]<=t for f in C)+sum(g[2] for g in G if g[0]<=t)))
     vw.release()
-    lg=[dict(t=round(f[0],1),id=f[1],d=f[2]) for f in F];evd=[a['id'] for a in A if not a['pays']]
+    lg=[dict(t=round(f[0],1),ids=[f[1]],k=1,d=f[2]) for f in C]+[dict(t=round(g[0],1),ids=g[1],k=g[2],d=0) for g in G];lg.sort(key=lambda x:x['t']);evd=[a['id'] for a in A if not a['pays']]
     R=dict(seed=S,ct=ct,log=lg,ev=evd,late=[a['id'] for a in A if a['late']],N=len(A),res=batch(pm,pd),clean=batch(0,0),rough=batch(.08,.08),every=EVERY*DT)
     json.dump(R,open('r.json','w'));json.dump(fr,open('fr.json','w'));print(R['res'],R['clean'],R['rough'],len(fr))
     cv2.imwrite('prev.jpg',draw(A,45,pos[450],B,V,F,450))
