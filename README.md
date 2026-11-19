@@ -22,3 +22,9 @@ Proof of concept: count people boarding a bus with a camera (anonymous tracking 
 4. Pilot: data request to operator / national authority.
 
 Privacy: no face recognition, no image storage, aggregate output only.
+
+## Measure real accuracy (blocker #1)
+1. Film 3+ clips (20-60 s) of a real entrance, camera high and facing the door: 1 person, 5 people, a crowd.
+2. Count by hand how many people cross the door line inward and outward in each clip.
+3. Fill clips.csv (video,line_y,max_frames,true_in,true_out) and run: python src/evaluate.py clips.csv
+The printed error rate is the first real accuracy number. Do not quote any other.
