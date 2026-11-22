@@ -1,0 +1,7 @@
+{"version":"0.2.0","configurations":[
+{"name":"1. Track sample video","type":"debugpy","request":"launch","program":"${workspaceFolder}/src/track.py","args":["v.avi","0.55","400"],"cwd":"${workspaceFolder}"},
+{"name":"2. Build tracking dashboard","type":"debugpy","request":"launch","program":"${workspaceFolder}/src/build.py","cwd":"${workspaceFolder}"},
+{"name":"3. Bus simulation (seed 3)","type":"debugpy","request":"launch","program":"${workspaceFolder}/src/sim.py","args":["3"],"cwd":"${workspaceFolder}"},
+{"name":"4. Build simulation dashboard","type":"debugpy","request":"launch","program":"${workspaceFolder}/src/build_sim_dashboard.py","cwd":"${workspaceFolder}"},
+{"name":"5. Validator light test","type":"debugpy","request":"launch","program":"${workspaceFolder}/src/validator_light.py","cwd":"${workspaceFolder}"},
+{"name":"6. Evaluate accuracy (clips.csv)","type":"debugpy","request":"launch","program":"${workspaceFolder}/src/evaluate.py","args":["clips.csv"],"cwd":"${workspaceFolder}"}]}

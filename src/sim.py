@@ -1,4 +1,4 @@
-import cv2,numpy as np,random,json,base64,math,sys
+import cv2,numpy as np,random,json,base64,math,sys,os
 DT=0.1;T=80;GR=8.0;LY=300;DI=(85,135);DO=(455,505);VAL=(140,290);EVERY=2
 SEATS=[(x,y) for y in (110,160,210) for x in (220,280,340,400,460,520)]
 def make(seed,N=14,ev=.25,late=.15):
@@ -92,7 +92,7 @@ def draw(A,t,row,B,V,F,k):
 if __name__=='__main__':
     S=int(sys.argv[1]);pm=pd=.03;A=make(S);ev,pos=run(A);B,V,Al=perceive(ev,S,pm,pd);F=flag(B,V)
     C,G=F;print('evaders',[a['id'] for a in A if not a['pays']],'late',[a['id'] for a in A if a['late']],'conf',[(round(f[0],1),f[1],f[2]) for f in C],'grp',[(round(g[0],1),g[1],g[2]) for g in G])
-    vw=cv2.VideoWriter('/mnt/user-data/outputs/bus-simulation.mp4',cv2.VideoWriter_fourcc(*'mp4v'),10,(640,360));fr=[];ct=[]
+    vw=cv2.VideoWriter('bus-simulation.mp4',cv2.VideoWriter_fourcc(*'mp4v'),10,(640,360));fr=[];ct=[]
     for k in range(len(pos)):
         t=k*DT;im=draw(A,t,pos[k],B,V,F,k);vw.write(im)
         if k%EVERY==0:

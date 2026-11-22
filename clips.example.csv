@@ -1,0 +1,3 @@
+video,line_y,max_frames,true_in,true_out
+# fill with your own clips and hand counts, e.g.
+# my_clip.mp4,0.55,600,5,4

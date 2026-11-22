@@ -1,6 +1,13 @@
 m.onnx
 v.avi
 f*.jpg
+x.jpg
+prev.jpg
 d.json
+r.json
+fr.json
 *.html
+*.mp4
 __pycache__/
+.venv/
+.pytest_cache/
