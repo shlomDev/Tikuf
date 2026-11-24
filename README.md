@@ -1,6 +1,6 @@
-# gap-counter
+# Tikuf (תיקוף)
 
-Proof of concept for public transport: count people boarding a bus anonymously (heads/people get a temporary numeric ID, no faces, no stored images) and compare against fare validations, to flag boardings with no tap and to produce load statistics. Aggregate and event-level output only.
+Tikuf is a proof of concept for public transport: count people boarding a bus anonymously (heads/people get a temporary numeric ID, no faces, no stored images) and compare against fare validations, to flag boardings with no tap and to produce load statistics. Aggregate and event-level output only.
 
 ## Status (read this first)
 Demo-ready: yes. Pilot-ready: not yet (see `docs/READINESS.md`). Tracking fragments IDs on generated bus clips (`docs/VIDEO_TESTS.md`), so real-footage accuracy comes first.
@@ -20,7 +20,7 @@ Published research suggests overhead-camera counting reaches roughly 92-96% (see
     pip install -r requirements-dev.txt
     sh scripts/setup.sh                                     # downloads m.onnx (model) and v.avi (sample clip)
     python src/track.py v.avi 0.55 400                      # video, line height (0-1), max frames
-    python src/build.py                                     # writes gap-counter-demo.html
+    python src/build.py                                     # writes Tikuf-demo.html
     python src/sim.py 3 && python src/build_sim_dashboard.py   # ride simulation + dashboard + bus-simulation.mp4
     python src/validator_light.py                           # optical validator reader, synthetic test
     python -m pytest -q tests

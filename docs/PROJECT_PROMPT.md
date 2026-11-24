@@ -1,4 +1,4 @@
-# Project brief for a coding agent (Claude Code, Codex, Copilot Chat)
+# Tikuf - project brief for a coding agent (Claude Code, Codex, Copilot Chat)
 Paste this whole file as the first message, with the repository open. It is self-contained.
 
 ## 1. Role
