@@ -3,6 +3,8 @@
 Proof of concept for public transport: count people boarding a bus anonymously (heads/people get a temporary numeric ID, no faces, no stored images) and compare against fare validations, to flag boardings with no tap and to produce load statistics. Aggregate and event-level output only.
 
 ## Status (read this first)
+Demo-ready: yes. Pilot-ready: not yet (see `docs/READINESS.md`). Tracking fragments IDs on generated bus clips (`docs/VIDEO_TESTS.md`), so real-footage accuracy comes first.
+
 | | |
 |---|---|
 | Works | Person detection (YOLOX-nano, ONNX, CPU), ByteTrack-style tracking, door-line counting, HTML dashboards, ride simulator, no-tap flagging, optical validator-light reader |
@@ -36,8 +38,15 @@ Published research suggests overhead-camera counting reaches roughly 92-96% (see
     src/build_sim_dashboard.py simulation dashboard
     src/validator_light.py     reads the green validation light from a tight camera crop
     src/evaluate.py            real accuracy against hand counts (clips.csv)
+    src/reconcile.py           per-stop boardings vs all payment records, with camera-error band
+    src/track_stats.py         ID-stability stats for clips without ground truth
     tests/                     pytest
-    docs/                      PROJECT_PROMPT, TECH_RESEARCH, PRIVACY, PILOT_LETTER
+    docs/                      PROJECT_PROMPT, READINESS, VIDEO_TESTS, TECH_RESEARCH, PRIVACY, PILOT_LETTER
+
+## Dual-camera clips and bigger model
+    python src/track.py clip.mp4 0.55 600 left out.json    # left|right|full, optional output json
+    python src/track_stats.py out.json
+    MODEL=ms.onnx python src/track.py ...                  # YOLOX-s (curl .../yolox_s.onnx), tunables: IOU1 MISS_S CONF MINH
 
 ## Measure real accuracy (do this first)
 Film 3+ clips (20-60 s) of a real entrance, camera high and facing down at the door: 1 person, 5 people, a crowd. Count crossings by hand, copy `clips.example.csv` to `clips.csv`, fill it, run `python src/evaluate.py clips.csv`.

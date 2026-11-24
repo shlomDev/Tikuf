@@ -27,6 +27,8 @@ Python 3.10+, CPU only, ONNX Runtime, OpenCV, NumPy, SciPy, pytest. Free permiss
 - `src/evaluate.py`: real accuracy against hand counts from `clips.csv`.
 - `tests/test_core.py`: 3 tests (exact count with perfect camera, clean precision, light reader).
 
+- `src/reconcile.py`: per-stop boardings vs all payment records (rav-kav, app, qr, pass) with an uncertainty band from camera miss/double-count rates; `reliable` is false when the evasion signal is below the camera error. `src/track_stats.py` and `docs/VIDEO_TESTS.md`: ID-stability proxies on generated clips (many IDs live under 1 s). `docs/READINESS.md` lists pilot blockers.
+
 ## 5. Measured vs simulated
 - Measured: 53 FPS on CPU on the public OpenCV `vtest.avi` clip (first 400 frames: 22 IDs, 9 inward and 11 outward crossings at a line at 55% height). Distant people are missed.
 - Simulated (assumptions: 25% non-payers, 15% app taps, camera errors as stated): perfect camera = exact per-ride count; 3% missed + 3% double counted = 91% of confident flags right, 93% of evaders flagged or narrowed to a pair, 0.53 mean count error per ride; 8%/8% = 80%, 85%, 0.99.

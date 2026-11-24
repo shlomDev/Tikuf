@@ -8,6 +8,8 @@ Fill the placeholders, attach the simulation video, get a quick legal review of 
 שלום רב,
 שמי שלמה, מהנדס תשתיות IT עם רקע בפיתוח תוכנה ואנדרואיד. אני מקים חברה לפיתוח כלי נתונים לתחבורה ציבורית ופונה אליכם בהצעה לפיילוט קצר ומוגדר.
 
+**הקשר.** ככל הידוע לנו, אצל חלק מהמפעילים כבר פועלות מערכות ספירה וחיישני דלת שמושוות לתיקופים. ההצעה כאן משלימה אותן ולא מחליפה: סימון ברמת אירוע עם התמודדות מפורשת עם עמימות, הכוונת פקחים, וכן אפשרות לעבוד על נתוני הספירה והתיקוף הקיימים אם יתאפשר.
+
 **ההצעה.** מערכת שסופרת עליות באופן אנונימי באמצעות מצלמה מעל הדלת, ומשווה אותן לאירועי התיקוף. עלייה ללא תיקוף בחלון זמן קצר מסומנת כאירוע (שעה, דלת, קו, נסיעה). כשיש עמימות, למשל שני נוסעים שעלו יחד ותיקוף אחד, המערכת מדווחת "אחד משניים לא תיקף" ולא מנחשת. התוצאה: נתוני עומס ותיקוף לפי קו ושעה לתכנון, והכוונת פקחים לנסיעות ולשעות עם שיעור אי-תיקוף גבוה.
 
 **פרטיות מובנית.** אין זיהוי פנים ואין מידע ביומטרי. לא נשמרות תמונות או וידאו. העיבוד על ההתקן והפלט הוא ספירות וחותמות זמן. אין אכיפה כלפי אדם מסוים על בסיס וידאו. נפעל לפי הדין הישראלי ונבצע סקירה משפטית לפני כל התקנה.
@@ -24,6 +26,8 @@ Fill the placeholders, attach the simulation video, get a quick legal review of 
 **Subject: Free pilot proposal - automatic detection of boardings without a Rav-Kav tap, no personal identification**
 
 Dear Sir or Madam, my name is Shlomo, an IT infrastructure engineer with a software and Android background, founding a company that builds data tools for public transport. I propose a short, well-defined pilot.
+
+**Context.** To our knowledge some operators already run door-sensor counting systems cross-checked against validations. This proposal complements them rather than replacing them: event-level flags with explicit handling of ambiguity, inspector dispatch, and, where possible, working on the existing count and validation data.
 
 **Proposal.** An overhead camera counts boardings anonymously and compares them with validation events. A boarding with no tap within a short window is flagged as an event (time, door, line, trip). When it is ambiguous, the system reports "one of two did not tap" instead of guessing. Output: load and validation statistics by line and hour, and inspector deployment targeted at trips and hours with a high non-validation rate.
 
