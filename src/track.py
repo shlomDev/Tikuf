@@ -3,7 +3,7 @@ from scipy.optimize import linear_sum_assignment
 SRC,LY=sys.argv[1],float(sys.argv[2])
 CR=sys.argv[4] if len(sys.argv)>4 else 'full'   # full | left | right (side-by-side dual-camera video)
 OUT=sys.argv[5] if len(sys.argv)>5 else 'd.json'
-IOU1=float(os.environ.get('IOU1',0.15));MISS_S=float(os.environ.get('MISS_S',2));CONF=int(os.environ.get('CONF',3));MINH=float(os.environ.get('MINH',0.12))
+IOU1=float(os.environ.get('IOU1',0.15));MISS_S=float(os.environ.get('MISS_S',2));CONF=int(os.environ.get('CONF',3));MINH=float(os.environ.get('MINH',0.12));SIM_TAPS=int(os.environ.get('SIM_TAPS',1))
 ss=ort.InferenceSession(os.environ.get('MODEL','m.onnx')); inn=ss.get_inputs()[0].name; S=int(ss.get_inputs()[0].shape[2])
 g=[];st=[]
 for s in (8,16,32):
@@ -64,8 +64,9 @@ while True:
             if t.prev<ly<=cy: ev.append(('B',fr,t.id))
             elif t.prev>=ly>cy: ev.append(('A',fr,t.id))
         t.prev=cy;boxes.append((t.id,t.b))
-    for e in ev:
-        if e[0]=='B' and e[1]==fr and rnd.random()<0.7: vals.append(fr+int(rnd.uniform(1,10)*fps))
+    if SIM_TAPS:  # demo scaffolding: fake validator taps, never real readings
+        for e in ev:
+            if e[0]=='B' and e[1]==fr and rnd.random()<0.7: vals.append(fr+int(rnd.uniform(1,10)*fps))
     v=f.copy()
     for k,tr in trail.items():
         if any(k==b[0] for b in boxes):

@@ -16,3 +16,25 @@ def test_reconcile_exact_and_band():
 def test_trip_total_not_per_stop_clipped():
     bo=[{'stop':1,'type':'board'}]*5+[{'stop':2,'type':'board'}]*5;pa=[{'stop':1,'method':'qr'}]*7+[{'stop':2,'method':'qr'}]*1
     assert rc.reconcile(bo,pa,0,0)['TRIP']['unpaid_est']==2
+
+
+def test_duplicate_sighting_is_not_an_evader():
+    """A person who paid but is seen twice must never be reported as a no-tap.
+
+    Before the fix this reported 76 false no-taps across 30 all-paying rides at a
+    20% duplicate rate, which would have been presented to an operator as evasion."""
+    false_unpaid = 0
+    for s in range(30):
+        A = sim.make(s, ev=0.0)
+        ev, _ = sim.run(A)
+        B, V, _ = sim.perceive(ev, s, 0.0, 0.20)
+        C, G = sim.flag(B, V)
+        false_unpaid += len(C) + sum(g[2] for g in G)
+    assert false_unpaid == 0
+
+
+def test_noise_does_not_inflate_the_evasion_number():
+    """Under realistic camera error the estimate must not drift upward."""
+    r = sim.batch(.03, .03, n=120)
+    assert r['bias'] < 0.2          # never over-report evasion
+    assert r['mae'] < 0.6
