@@ -41,28 +41,41 @@ def perceive(ev,seed,pm,pd):
         if r.random()<pd: B.append((e[0]+r.uniform(.5,2),e[2],1))
     return sorted(B),V,A
 def flag(B,V):
+    """Match boardings to taps and report only the boardings that cannot be explained.
+
+    Camera duplicates are collapsed to one boarding per person before any counting.
+    They used to be counted as extra boardings, so a passenger who paid but was seen
+    twice showed up as an evader (measured: 2.5 false no-taps per ride at 20% dup rate).
+    A duplicate is a camera error, and it belongs in the uncertainty band, not in the
+    evasion number."""
+    first={}
+    for i,b in enumerate(B):
+        first.setdefault(b[1],i)                    # earliest sighting per person id
+    U=sorted((i,bid) for bid,i in first.items())    # unique boardings, in time order
     m=set();vu=set()
     for j,v in enumerate(V):
-        if v[3]:
-            for i,b in enumerate(B):
-                if b[1]==v[2] and not b[2] and i not in m: m.add(i);vu.add(j);break
-    rb=[i for i in range(len(B)) if i not in m];rv=[j for j in range(len(V)) if j not in vu]
-    par={('b',i):('b',i) for i in rb};par.update({('v',j):('v',j) for j in rv})
+        if v[3]:                                    # validator tap: position is known
+            for k,(i,bid) in enumerate(U):
+                if bid==v[2] and not B[i][2] and k not in m: m.add(k);vu.add(j);break
+    rb=[k for k in range(len(U)) if k not in m];rv=[j for j in range(len(V)) if j not in vu]
+    par={('b',k):('b',k) for k in rb};par.update({('v',j):('v',j) for j in rv})
     def f(x):
         while par[x]!=x: par[x]=par[par[x]];x=par[x]
         return x
-    for i in rb:
+    for k in rb:
+        tb=B[U[k][0]][0]
         for j in rv:
-            if B[i][0]-2<=V[j][0]<=B[i][0]+GR: par[f(('b',i))]=f(('v',j))
+            if tb-2<=V[j][0]<=tb+GR: par[f(('b',k))]=f(('v',j))
     comp={}
     for x in par: comp.setdefault(f(x),[]).append(x)
     conf=[];grp=[]
     for c in comp.values():
-        bs=[x[1] for x in c if x[0]=='b'];nt=sum(1 for x in c if x[0]=='v');k=len(bs)-nt
+        ks=[x[1] for x in c if x[0]=='b'];nt=sum(1 for x in c if x[0]=='v');k=len(ks)-nt
         if k<=0: continue
+        tmax=max(B[U[x][0]][0] for x in ks)
         if nt==0:
-            for i in bs: conf.append((B[i][0]+GR,B[i][1],B[i][2]))
-        else: grp.append((max(B[i][0] for i in bs)+GR,[B[i][1] for i in bs],k))
+            for x in ks: conf.append((tmax+GR,U[x][1],0))
+        else: grp.append((tmax+GR,[U[x][1] for x in ks],k))
     return sorted(conf),sorted(grp)
 def batch(pm,pd,n=300):
     h=e=tp=nc=cv=0;ab=bi=0

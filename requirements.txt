@@ -1,4 +1,4 @@
-onnxruntime
-opencv-python-headless
-numpy
-scipy
+numpy==2.4.6
+opencv-python-headless==5.1.0
+scipy>=1.11,<2
+onnxruntime>=1.17,<2
