@@ -1,5 +1,6 @@
 import json,base64,glob
 d=json.load(open('d.json'));fs=sorted(glob.glob('f*.jpg'))
+if not fs: print('note: no frames on disk (WRITE_FRAMES=0). Re-run track.py with WRITE_FRAMES=1 for the video demo.')
 im=['data:image/jpeg;base64,'+base64.b64encode(open(f,'rb').read()).decode() for f in fs]
 h='''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Gap Counter – live tracking demo</title><meta name="color-scheme" content="light dark">
 <style>

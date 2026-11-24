@@ -1,9 +1,10 @@
 import cv2,numpy as np,onnxruntime as ort,json,time,sys,random,os
 from scipy.optimize import linear_sum_assignment
+from track_util import match_by_distance
 SRC,LY=sys.argv[1],float(sys.argv[2])
 CR=sys.argv[4] if len(sys.argv)>4 else 'full'   # full | left | right (side-by-side dual-camera video)
 OUT=sys.argv[5] if len(sys.argv)>5 else 'd.json'
-IOU1=float(os.environ.get('IOU1',0.15));MISS_S=float(os.environ.get('MISS_S',2));CONF=int(os.environ.get('CONF',3));MINH=float(os.environ.get('MINH',0.12));SIM_TAPS=int(os.environ.get('SIM_TAPS',1))
+IOU1=float(os.environ.get('IOU1',0.15));MISS_S=float(os.environ.get('MISS_S',2));CONF=int(os.environ.get('CONF',3));MINH=float(os.environ.get('MINH',0.12));DIST1=float(os.environ.get('DIST1',0.6));SIM_TAPS=int(os.environ.get('SIM_TAPS',1));WRITE_FRAMES=int(os.environ.get('WRITE_FRAMES',0))
 ss=ort.InferenceSession(os.environ.get('MODEL','m.onnx')); inn=ss.get_inputs()[0].name; S=int(ss.get_inputs()[0].shape[2])
 g=[];st=[]
 for s in (8,16,32):
@@ -46,9 +47,14 @@ while True:
     hi=[d for d in ds if d[4]>=0.4];lo=[d for d in ds if d[4]<0.4]
     m,ut,ud=match(tracks,hi,IOU1)
     for i,j in m: tracks[i].upd(hi[j])
-    rest=[tracks[i] for i in ut];m2,ut2,_=match(rest,lo,0.4)
+    rest=[tracks[i] for i in ut];m2,ut2,ud2=match(rest,lo,0.4)
     for i,j in m2: rest[i].upd(lo[j])
-    um=set(id(rest[i]) for i in ut2)
+    # second chance: a jittering or partly hidden person keeps their ID
+    left_t=[rest[i] for i in ut2];left_d=[lo[j] for j in ud2]+[hi[j] for j in ud]
+    matched=set()
+    for i,j in match_by_distance(left_t,left_d,DIST1):
+        left_t[i].upd(left_d[j]);matched.add(id(left_t[i]))
+    um=set(id(t) for t in left_t if id(t) not in matched)
     for t in tracks:
         if id(t) in um: t.miss+=1;t.b=t.pred()
     for j in ud:
@@ -75,7 +81,8 @@ while True:
         x1,y1,x2,y2=map(int,b);cv2.rectangle(v,(x1,y1),(x2,y2),(60,200,90),2);cv2.putText(v,f'#{i}',(x1,max(12,y1-4)),0,0.55,(255,255,255),2);cv2.putText(v,f'#{i}',(x1,max(12,y1-4)),0,0.55,(20,20,20),1)
     cv2.line(v,(0,int(ly)),(W,int(ly)),(0,140,255),2)
     s=480/W;v=cv2.resize(v,(480,int(H*s)))
-    if OUT=='d.json' and fr%2==0: cv2.imwrite(f'f{fr//2:04d}.jpg',v,[cv2.IMWRITE_JPEG_QUALITY,52])
+    if WRITE_FRAMES and fr%2==0:   # off by default: no images on disk
+        cv2.imwrite(f'f{fr//2:04d}.jpg',v,[cv2.IMWRITE_JPEG_QUALITY,52])
     F.append(dict(n=len(boxes),B=sum(e[0]=='B' for e in ev),A=sum(e[0]=='A' for e in ev),V=sum(1 for x in vals if x<=fr),U=len(seen)))
     fr+=1
     if fr>=int(sys.argv[3]): break

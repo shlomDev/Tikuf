@@ -25,6 +25,13 @@ Published research suggests overhead-camera counting reaches roughly 92-96% (see
     python src/validator_light.py                           # optical validator reader, synthetic test
     python -m pytest -q tests
 
+## POC in one command
+    python src/poc.py --video v.avi --line 0.55 --frames 400 --payments payments.example.csv --out poc.html
+
+It runs the real detector and tracker on the clip, reads the taps that were actually recorded, reconciles them, and writes `poc.html`: boardings, taps, the no-tap estimate as a *range* whose width is the camera's own error, and a simulated section with ground truth (recall, precision, count error, bias). If the signal is smaller than the camera error the report says so instead of quoting a rate.
+
+Frames are no longer written to disk by default (`WRITE_FRAMES=0`), which matches `docs/PRIVACY.md`. For the video dashboard demo run `WRITE_FRAMES=1 python src/track.py v.avi 0.55 400` first.
+
 ## Open in VS Code
 1. File > Open Folder > this folder. Accept the recommended extensions.
 2. Run and Debug (Ctrl+Shift+D) has 6 ready configurations (track, dashboards, simulation, validator test, evaluation).
