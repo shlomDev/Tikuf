@@ -11,3 +11,6 @@ fr.json
 __pycache__/
 .venv/
 .pytest_cache/
+footage/
+*.webm
+payments.csv
